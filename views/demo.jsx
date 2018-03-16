@@ -21,12 +21,12 @@ export default React.createClass({
 
   getInitialState() {
     return {
-      model: 'en-US_BroadbandModel',
+      model: 'ja-JP_BroadbandModel',
       rawMessages: [],
       formattedMessages: [],
       audioSource: null,
       speakerLabels: true,
-      keywords: this.getKeywords('en-US_BroadbandModel'),
+      keywords: this.getKeywords('ja-JP_BroadbandModel'),
       // transcript model and keywords are the state that they were when the button was clicked.
       // Changing them during a transcription would cause a mismatch between the setting sent to the
       // service and what is displayed on the demo, and could cause bugs.
@@ -393,8 +393,8 @@ export default React.createClass({
 
     const messages = this.getFinalAndLatestInterimResult();
     const micBullet = (typeof window !== 'undefined' && recognizeMicrophone.isSupported) ?
-      <li className="base--li">Use your microphone to record audio.</li> :
-      <li className="base--li base--p_light">Use your microphone to record audio. (Not supported in current browser)</li>;// eslint-disable-line
+      <li className="base--li">Record Audio:マイクから音声をレコーディング。</li> :
+      <li className="base--li base--p_light">Record Audio:マイクから音声をレコーディング。（現在のブラウザをサポートしていません。）</li>;// eslint-disable-line
 
     return (
 
@@ -419,27 +419,20 @@ export default React.createClass({
           </div>
         </div>
 
-        <h2 className="base--h2">Transcribe Audio</h2>
+        <h2 className="base--h2">音声データをテキストへ変換</h2>
 
         <ul className="base--ul">
           {micBullet}
-          <li className="base--li">{'Upload pre-recorded audio (.mp3, .mpeg, .wav, .flac, or .opus only).'}</li>
-          <li className="base--li">Play one of the sample audio files.*</li>
+          <li className="base--li">{'Upload Audio File:サポートする音声ファイルのフォーマット (.mp3, .mpeg, .wav, .flac, .opus)。'}</li>
+          <li className="base--li">Play Sample:サンプル音声データを再生しながらテキストへ変換。</li>
         </ul>
-
-        <div className="smalltext">
-          {'*Both US English broadband sample audio files are covered under the Creative Commons license.'}
-        </div>
 
         <div style={{
           paddingRight: '3em',
           paddingBottom: '2em',
         }}
         >
-          The returned result includes the recognized text, {' '}
-          <a className="base--a" href="https://console.bluemix.net/docs/services/speech-to-text/output.html#word_alternatives">word alternatives</a>, {' '}
-          and <a className="base--a" href="https://console.bluemix.net/docs/services/speech-to-text/output.html#keyword_spotting">spotted keywords</a>. {' '}
-          Some models can <a className="base--a" href="https://console.bluemix.net/docs/services/speech-to-text/output.html#speaker_labels">detect multiple speakers</a>; this may slow down performance.
+          識別結果としてテキスト、ゆらぎワードと時刻、指定したキーワードのヒット時刻と精度が出力されます。
         </div>
         <div className="flex setup">
           <div className="column">
