@@ -1,5 +1,6 @@
 /* eslint no-param-reassign: 0 */
 import React from 'react';
+import FileDownload from 'js-file-download';
 import Dropzone from 'react-dropzone';
 import { Icon, Tabs, Pane, Alert } from 'watson-react-components';
 import recognizeMicrophone from 'watson-speech/speech-to-text/recognize-microphone';
@@ -149,6 +150,23 @@ export default React.createClass({
   },
   handleSample2Click() {
     this.handleSampleClick(2);
+  },
+  handleExportClick() {
+    if (this.state.speakerLabels) {
+      const results = this.getFinalAndLatestInterimResult().map(msg =>
+        msg.results.map((result, i) => (
+          ((typeof result.speaker === 'number' ? `Speaker ${result.speaker}: ` : '(Detecting speakers): ') + result.alternatives[0].transcript).concat('\r\n')
+        ))).reduce((a, b) => a.concat(b));
+      FileDownload(results, 'output.txt');
+    }
+    else {
+      const results = this.getFinalAndLatestInterimResult().map(msg =>
+        msg.results.map((result, i) => (
+          (result.alternatives[0].transcript).concat('\r\n')
+        )),
+      ).reduce((a, b) => a.concat(b), []); // the reduce() call flattens the array
+      FileDownload(results, 'output.txt');
+    }
   },
 
   handleSampleClick(which) {
@@ -391,10 +409,24 @@ export default React.createClass({
       )
       : null;
 
+    const exportButton = (this.state.formattedMessages.length > 0)
+      ? (
+        <div className="flex buttons">
+          <button className={buttonClass} onClick={this.handleExportClick}>
+            <Icon type={!!this.state.audioSource? 'loader' : 'check'} size="small" /> Export Text Result
+          </button>
+        </div>
+      )
+      : null;
+
     const messages = this.getFinalAndLatestInterimResult();
     const micBullet = (typeof window !== 'undefined' && recognizeMicrophone.isSupported) ?
-      <li className="base--li">Record Audio:マイクから音声をレコーディング。</li> :
-      <li className="base--li base--p_light">Record Audio:マイクから音声をレコーディング。（現在のブラウザをサポートしていません。）</li>;// eslint-disable-line
+      <li className="base--li">Record Audioボタン:マイクから音声をレコーディング。</li> :
+      <li className="base--li base--p_light">Record Audioボタン:マイクから音声をレコーディング。（現在のブラウザをサポートしていない。）</li>;// eslint-disable-line
+
+    const micCaution = (typeof window !== 'undefined' && recognizeMicrophone.isSupported) ?
+      <div></div>:
+      <li className="base--li base--p_light">現在のブラウザは「Record Audio」をサポートしていない。</li>;// eslint-disable-line
 
     return (
 
@@ -420,11 +452,28 @@ export default React.createClass({
         </div>
 
         <h2 className="base--h2">音声データをテキストへ変換</h2>
-
+        <h3 className="base--h3">機能説明</h3>
+        <ul className="base--ul">
+          <li className="base--li">日本語の音声データをリアルタイムで話者を区別しながら、下記の「Text」タブにテキストで出力する。</li>
+          <li className="base--li">話者はSeaker+IDの形式で区別する。（話者の音声を事前に入力する必要がない）</li>
+          <li className="base--li">使える日本語音声認識モデルはVoice Modelリストにある2種類がある。</li>
+          <li className="base--li">各モデルに合わせてサンプルキーワードとサンプル音声データ2種類が用意されている。</li>
+          <li className="base--li">その他、マイクによる直接音声入力と音声ファイル指定をサポートしている。</li>
+        </ul>
+        <h3 className="base--h3">入力説明</h3>
         <ul className="base--ul">
           {micBullet}
-          <li className="base--li">{'Upload Audio File:サポートする音声ファイルのフォーマット (.mp3, .mpeg, .wav, .flac, .opus)。'}</li>
-          <li className="base--li">Play Sample:サンプル音声データを再生しながらテキストへ変換。</li>
+          <li className="base--li">{'Upload Audio Fileボタン:サポートする音声ファイルのフォーマット (.mp3, .mpeg, .wav, .flac, .opus)。'}</li>
+          <li className="base--li">Play Sampleボタン:サンプル音声データを再生しながらテキストへ変換。</li>
+          <li className="base--li">Voice Modelを選択した後、任意で音声から位置を特定したいキーワードを「Keywords to spot」にカンマ区切りで指定できる。</li>
+        </ul>
+
+        <h3 className="base--h3">出力説明</h3>
+        <ul className="base--ul">
+          <li className="base--li">「Text」タブ：音声データから識別したテキストと話者仮IDを出力。</li>
+          <li className="base--li">「Word Timings And Alternatives」タブ：識別したテキストのゆらぎワードを出力。</li>
+          <li className="base--li">「Keywords」タブ：指定したキーワードの出現タイミングと識別精度を出力。</li>
+          <li className="base--li">「JSON」タブ：APIからのレスポンスサンプルを出力。</li>
         </ul>
 
         <div style={{
@@ -432,7 +481,7 @@ export default React.createClass({
           paddingBottom: '2em',
         }}
         >
-          識別結果としてテキスト、ゆらぎワードと時刻、指定したキーワードのヒット時刻と精度が出力されます。
+          {micCaution}
         </div>
         <div className="flex setup">
           <div className="column">
@@ -494,6 +543,8 @@ export default React.createClass({
           </button>
 
         </div>
+
+        {exportButton}
 
         {err}
 
