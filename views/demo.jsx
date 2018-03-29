@@ -154,17 +154,20 @@ export default React.createClass({
   handleExportClick() {
     if (this.state.speakerLabels) {
       const results = this.getFinalAndLatestInterimResult().map(msg =>
-        msg.results.map((result, i) => (
-          ((typeof result.speaker === 'number' ? `Speaker ${result.speaker}: ` : '(Detecting speakers): ') + result.alternatives[0].transcript).concat('\r\n')
-        ))).reduce((a, b) => a.concat(b));
+        msg.results.map((result, i) =>
+          ((typeof result.speaker === 'number' 
+            ? `Speaker ${result.speaker}: ` 
+            : '(Detecting speakers): ') + result.alternatives[0].transcript
+          )
+        )).reduce((a, b) => b, []).join('\r\n');
       FileDownload(results, 'output.txt');
     }
     else {
       const results = this.getFinalAndLatestInterimResult().map(msg =>
         msg.results.map((result, i) => (
-          (result.alternatives[0].transcript).concat('\r\n')
+          result.alternatives[0].transcript
         )),
-      ).reduce((a, b) => a.concat(b), []); // the reduce() call flattens the array
+      ).reduce((a, b) => a.concat(b), []).join('\r\n'); // the reduce() call flattens the array
       FileDownload(results, 'output.txt');
     }
   },
